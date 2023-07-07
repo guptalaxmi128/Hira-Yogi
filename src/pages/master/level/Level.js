@@ -26,14 +26,17 @@ import {
 } from '@mui/material';
 
 import { useDispatch, useSelector } from 'react-redux';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 // import { addStatus } from '../../actions/master/status';
 import Scrollbar from '../../../components/Scrollbar';
 import SearchNotFound from '../../../components/SearchNotFound';
 import { UserListHead, UserListToolbar, UserMoreMenu } from '../../../components/user';
-import { addLevel } from 'actions/master/level';
+import { addLevel, deleteLevel } from 'actions/master/level';
 
 const TABLE_HEAD = [
+    { id: 'sno', label: 'SNo', alignRight: true },
     { id: 'catgory', label: 'level', alignRight: true },
+    { id: 'delete', label: <DeleteOutlineIcon />, alignRight: true },
 ];
 
 // ----------------------------------------------------------------------
@@ -67,7 +70,11 @@ function applySortFilter(array, comparator, query) {
 
 const Level = (props) => {
     const { levels } = props;
-    const [levelsTable, setLevelsTable] = useState(levels);
+    const [levelsTable, setLevelsTable] = useState(levels?.data || []);
+
+    const handleDelete = (levelCode) =>{
+        dispatch(deleteLevel(levelCode));
+    }
 
     const [page, setPage] = useState(0);
 
@@ -197,8 +204,9 @@ const Level = (props) => {
                                 onSelectAllClick={handleSelectAllClick}
                             />
                             <TableBody>
-                                {levelsTable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo) => {
-                                    const { id, level } = custInfo;
+                                {levelsTable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo,index) => {
+                                    const { id, level,levelCode } = custInfo;
+                                    const SNo=index+1;
                                     const isItemSelected = selected.indexOf(id) !== -1;
 
                                     return (
@@ -216,8 +224,22 @@ const Level = (props) => {
                                             <TableCell align="center">
                                                 <Stack direction="row" alignItems="center" spacing={2}>
                                                     <Typography variant="subtitle2" noWrap>
+                                                        {SNo}
+                                                    </Typography>
+                                                </Stack>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Stack direction="row" alignItems="center" spacing={2}>
+                                                    <Typography variant="subtitle2" noWrap>
                                                         {level}
                                                     </Typography>
+                                                </Stack>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Stack direction="row" alignItems="center" spacing={2} style={{cursor:'pointer'}}>
+                                                    {/* <Typography variant="subtitle2" noWrap> */}
+                                                        <DeleteOutlineIcon onClick={()=>handleDelete(levelCode)} />
+                                                    {/* </Typography> */}
                                                 </Stack>
                                             </TableCell>
                                         </TableRow>

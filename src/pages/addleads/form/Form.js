@@ -207,15 +207,15 @@ const Form = () => {
                         value={salutation}
                         onChange={handleChange}
                     >
-                        <MenuItem value="option1">Dr</MenuItem>
-                        <MenuItem value="option2">Madam</MenuItem>
-                        <MenuItem value="option3">Master</MenuItem>
-                        <MenuItem value="option4">Miss</MenuItem>
-                        <MenuItem value="option5">Mr</MenuItem>
-                        <MenuItem value="option6">Mrs</MenuItem>
-                        <MenuItem value="option7">Ms</MenuItem>
-                        <MenuItem value="option8">Mx</MenuItem>
-                        <MenuItem value="option9">Prof</MenuItem>
+                        <MenuItem value="Dr">Dr</MenuItem>
+                        <MenuItem value="Madam">Madam</MenuItem>
+                        <MenuItem value="Master">Master</MenuItem>
+                        <MenuItem value="Miss">Miss</MenuItem>
+                        <MenuItem value="Mr">Mr</MenuItem>
+                        <MenuItem value="Mrs">Mrs</MenuItem>
+                        <MenuItem value="Ms">Ms</MenuItem>
+                        <MenuItem value="Mx">Mx</MenuItem>
+                        <MenuItem value="Prof">Prof</MenuItem>
                     </Select>
                 </FormControl>
                 <FormControl fullWidth sx={{ mr: 1, mt: 2, ml: 1 }}>
@@ -507,6 +507,7 @@ const Form = () => {
                             sx={{ ml: 1, mr: 1 }}
                             type="text"
                             name="state"
+                            value={state}
                             onChange={(e)=>setState(e.target.value)}
                         />
                         <TextField

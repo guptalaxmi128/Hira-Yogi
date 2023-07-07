@@ -23,21 +23,22 @@ import {
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import EditIcon from '@mui/icons-material/Edit';
-// import Dropdown from 'react-bootstrap/Dropdown';
-// import "bootstrap/dist/css/bootstrap.min.css";
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { useDispatch} from 'react-redux';
+import Dropdown from 'react-bootstrap/Dropdown';
+import "bootstrap/dist/css/bootstrap.min.css";
 import Scrollbar from '../../../components/Scrollbar';
 import SearchNotFound from '../../../components/SearchNotFound';
 import { UserListHead, UserListToolbar, UserMoreMenu } from '../../../components/user';
-// import * as api from 'api';
+import { deleteEmployee } from 'actions/employee/employee';
 
 const TABLE_HEAD = [
     { id: 'sno', label: 'SNo', alignRight: true },
     { id: 'name', label: 'Name', alignRight: true },
     { id: 'email', label: 'Email', alignRight: true },
     { id: 'phoneNumber', label: 'Mobile Number', alignRight: true },
-    { id: 'employeesCode', label: 'Employee Code', alignRight: true }
-    // { id: '3dots', label: <MoreVertIcon />, alignRight: true },
+    { id: 'employeesCode', label: 'Employee Code', alignRight: true },
+    { id: '3dots', label: <MoreVertIcon />, alignRight: true },
 ];
 
 // ----------------------------------------------------------------------
@@ -84,11 +85,17 @@ function applySortFilter(array, comparator, query) {
 }
 
 const List = (props) => {
+    const dispatch=useDispatch();
     const { employee } = props;
     // console.log(user.data);
 
     const [listTable, setListTable] = useState(employee?.data)
-       
+
+    const handleDelete=(employeesCode)=>{
+        dispatch(deleteEmployee(employeesCode))
+    }
+     
+    
 
     const [page, setPage] = useState(0);
 
@@ -227,18 +234,17 @@ const List = (props) => {
                                                     View
                                                 </Button>
                                                 </Stack>
-                                            </TableCell>
+                                            </TableCell> */}
                                             <TableCell align="center">
                                             <Stack direction="row" alignItems="center" spacing={2}>
                                                 <Dropdown>
                                                     <Dropdown.Toggle as={CustomToggle} />
                                                     <Dropdown.Menu size="sm" title="">
-                                                        <Dropdown.Item><EditIcon />&nbsp;&nbsp;&nbsp;  Edit</Dropdown.Item>
-                                                        <Dropdown.Item><DeleteOutlineIcon />&nbsp;&nbsp;&nbsp;  Delete</Dropdown.Item>
+                                                        <Dropdown.Item onClick={()=>handleDelete(employeesCode)}><DeleteOutlineIcon />&nbsp;&nbsp;&nbsp;  Delete</Dropdown.Item>
                                                     </Dropdown.Menu>
                                                 </Dropdown>
                                                 </Stack>
-                                            </TableCell> */}
+                                            </TableCell>
                                         </TableRow>
                                     );
                                 })}

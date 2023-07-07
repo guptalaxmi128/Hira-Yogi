@@ -26,13 +26,17 @@ import {
 } from '@mui/material';
 
 import { useDispatch, useSelector } from 'react-redux';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import Scrollbar from '../../../components/Scrollbar';
 import SearchNotFound from '../../../components/SearchNotFound';
 import { UserListHead, UserListToolbar, UserMoreMenu } from '../../../components/user';
-import { addSubject } from 'actions/master/subject';
+import { addSubject, deleteSubject } from 'actions/master/subject';
+import { Topic } from '../../../../node_modules/@mui/icons-material/index';
 
 const TABLE_HEAD = [
-    { id: 'catgory', label: 'subject', alignRight: true },
+    { id: 'sno', label: 'SNo', alignRight: true },
+    { id: 'catgory', label: 'Topic', alignRight: true },
+    { id: 'delete', label: <DeleteOutlineIcon />, alignRight: true },
 ];
 
 // ----------------------------------------------------------------------
@@ -66,7 +70,11 @@ function applySortFilter(array, comparator, query) {
 
 const Subject = (props) => {
     const { subjects } = props;
-    const [subjectsTable, setSubjectsTable] = useState(subjects);
+    const [subjectsTable, setSubjectsTable] = useState(subjects?.data || []);
+
+    const handleDelete =(topicCode)=>{
+        dispatch(deleteSubject(topicCode))
+    }
 
     const [page, setPage] = useState(0);
 
@@ -129,16 +137,16 @@ const Subject = (props) => {
 
     const isUserNotFound = filteredUsers.length === 0;
 
-    const [subject, setSubject] = useState({
-        subject: ''
+    const [topic, setTopic] = useState({
+        topic: ''
     });
 
     const handleChange = ({ currentTarget: input }) => {
-        setSubject({
-            ...subject,
+        setTopic({
+            ...topic,
             [input.name]: input.value
         });
-        console.log(subject);
+        console.log(topic);
     };
 
     const dispatch = useDispatch();
@@ -146,13 +154,13 @@ const Subject = (props) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            console.log(subject);
-            dispatch(addSubject(subject));
-            setSubjectsTable([...subjectsTable, subject]);
-            setSubject({
-                subject: ''
+            console.log(topic);
+            dispatch(addSubject(topic));
+            setSubjectsTable([...subjectsTable, topic]);
+            setTopic({
+                topic: ''
             });
-            alert('subject submitted successfully');
+            alert('topic submitted successfully');
         } catch (error) {
             console.log(error);
         }
@@ -163,13 +171,14 @@ const Subject = (props) => {
             <form onSubmit={handleSubmit}>
                 <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, mt: 2, mb: 2 }}>
                     <TextField
-                        label="Subject"
+                        label="Topic" //Subject
                         variant="outlined"
                         fullWidth
                         sx={{ mr: { sm: 1 } }}
                         type="text"
-                        name="subject"
-                        value={subject.subject}
+                        // name="subject"
+                        name="topic"
+                        value={topic.topic}
                         onChange={handleChange}
                     />
                     <Box sx={{ width: '100%', ml: {sm:1} }} />
@@ -196,8 +205,9 @@ const Subject = (props) => {
                                 onSelectAllClick={handleSelectAllClick}
                             />
                             <TableBody>
-                                {subjectsTable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo) => {
-                                    const { id, subject } = custInfo;
+                                {subjectsTable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo,index) => {
+                                    const { id, topic,topicCode } = custInfo;
+                                    const SNo=index+1;
                                     const isItemSelected = selected.indexOf(id) !== -1;
 
                                     return (
@@ -215,8 +225,22 @@ const Subject = (props) => {
                                             <TableCell align="center">
                                                 <Stack direction="row" alignItems="center" spacing={2}>
                                                     <Typography variant="subtitle2" noWrap>
-                                                        {subject}
+                                                        {SNo}
                                                     </Typography>
+                                                </Stack>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Stack direction="row" alignItems="center" spacing={2}>
+                                                    <Typography variant="subtitle2" noWrap>
+                                                        {topic}
+                                                    </Typography>
+                                                </Stack>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Stack direction="row" alignItems="center" spacing={2} style={{cursor:'pointer'}}>
+                                                    {/* <Typography variant="subtitle2" noWrap> */}
+                                                        <DeleteOutlineIcon onClick={()=>handleDelete(topicCode)} />
+                                                    {/* </Typography> */}
                                                 </Stack>
                                             </TableCell>
                                         </TableRow>

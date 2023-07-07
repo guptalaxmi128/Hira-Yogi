@@ -190,7 +190,7 @@ const AddLeads = () => {
                 <Form />
             </TabPanel>
             <TabPanel value={value} index={1}>
-                <NewLead />
+                <NewLead lead={lead} />
             </TabPanel>
             <TabPanel value={value} index={2}>
                 <Lead lead={lead} />

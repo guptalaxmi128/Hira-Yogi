@@ -18,6 +18,17 @@ const categoryReducer = (state = initialState, action) => {
                 ...state,
                 categories: [...state.categories, action.payload],
             };
+            case actionTypes.DELETE_CATEGORY:
+                const updatedCategory = [];
+                for (let i = 0; i < state.categories.length; i++) {
+                  if (state.categories[i].code !== action.payload) {
+                    updatedCategory.push(state.categories[i]);
+                  }
+                }
+                return {
+                  ...state,
+                  categories: updatedCategory,
+                };
         default:
             return state;
     }

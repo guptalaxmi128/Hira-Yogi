@@ -2,6 +2,7 @@ import * as actionTypes from '../../constants/actionTypes';
 
 const initialState = {
     employee: [],
+    deletedEmployee: [],
     state: 'idle', // idle, loading, success, error
     error: null
 };
@@ -9,6 +10,7 @@ const initialState = {
 export const employeeReducer = (state = initialState, action) => {
     switch (action.type) {
         case actionTypes.ADD_REGISTER_EMPLOYEE:
+            case actionTypes.RESTORE_EMPLOYEE:
             return {
                 ...state,
                 employee: action.payload.employee
@@ -18,6 +20,22 @@ export const employeeReducer = (state = initialState, action) => {
                 ...state,
                 employee: action.payload,
             };
+            case actionTypes.GET_DELETE_EMPLOYEE:
+                return {
+                    ...state,
+                    deletedEmployee: action.payload,
+                };
+            case actionTypes.DELETE_EMPLOYEE:
+                const updatedEmployee = [];
+                for (let i = 0; i < state.employee.length; i++) {
+                  if (state.employee[i].code !== action.payload) {
+                    updatedEmployee.push(state.employee[i]);
+                  }
+                }
+                return {
+                  ...state,
+                  employee: updatedEmployee,
+                };
         default:
             return state;
     }

@@ -32,13 +32,13 @@ const content = {
             url: '/course',
             icon: icons.AppstoreAddOutlined
        },
-       {
-            id: 'banner',
-            title: 'Banner',
-            type: 'item',
-            url: '/banner',
-            icon: icons.AppstoreAddOutlined
-       }
+    //    {
+    //         id: 'banner',
+    //         title: 'Banner',
+    //         type: 'item',
+    //         url: '/banner',
+    //         icon: icons.AppstoreAddOutlined
+    //    }
     ]
 };
 

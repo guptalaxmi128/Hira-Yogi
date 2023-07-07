@@ -22,15 +22,19 @@ import {
     FormControl
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { useDispatch } from 'react-redux';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import EditIcon from '@mui/icons-material/Edit';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { Link } from 'react-router-dom';
-// import Dropdown from 'react-bootstrap/Dropdown';
-// import "bootstrap/dist/css/bootstrap.min.css";
+import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import Dropdown from 'react-bootstrap/Dropdown';
+import "bootstrap/dist/css/bootstrap.min.css";
 import Scrollbar from '../../../components/Scrollbar';
 import SearchNotFound from '../../../components/SearchNotFound';
 import { UserListHead, UserListToolbar, UserMoreMenu } from '../../../components/user';
+import { addAssignLead } from 'actions/assignlead/assignlead';
+import { deleteLead, restoreLead } from 'actions/leadbyleadcode/leadbyleadcode';
 
 
 const TABLE_HEAD = [{ id: 'sno', label: 'SNo', alignRight: true },
@@ -39,7 +43,7 @@ const TABLE_HEAD = [{ id: 'sno', label: 'SNo', alignRight: true },
 { id:'email',label : 'Email' , alignRight:true},
 { id: 'source', label: 'Source', alignRight: true },
 { id: 'date', label: 'Date', alignRight: true },
-// { id: '3dots', label: <MoreVertIcon />, alignRight: true },
+{ id: '3dots', label: <MoreVertIcon />, alignRight: true },
 ];
 
 // ----------------------------------------------------------------------
@@ -88,10 +92,45 @@ function applySortFilter(array, comparator, query) {
 
 
 const DoNotContact = (props) => {
+    const dispatch = useDispatch();
     const { lead} =props;
     const [listTable, setListTable] = useState(lead?.data);
          
     const contactData = listTable.filter((item) => item.status === 'donotcontact');
+    const [selectedLeads, setSelectedLeads] = useState([]);
+    const [showPopup, setShowPopup] = useState(false);
+    const [user, setUser] = useState(''); //for one users
+
+    const leadCodes = contactData.map((item) => item.leadCode);
+
+    const handleRestore =(leadCode)=>{
+        dispatch(restoreLead(leadCode));
+    }
+
+    const handleDelete = (leadCode)=>{
+        dispatch(deleteLead(leadCode));
+    }
+
+   
+    const handleAssignButtonClick = () => {
+        setShowPopup(true);
+    };
+
+    const handleAssignLeads = () => {
+        try {
+            const assignlead = {
+                leadProfileCode: leadCodes,
+                //  userCode:assignedUsers
+                userInformationCode: user
+            };
+            console.log(assignlead);
+            dispatch(addAssignLead(assignlead));
+        } catch (error) {
+            console.log(error);
+        }
+        setUser('');
+        setShowPopup(false);
+    };
 
     function formatDate(createdAt) {
         const date = new Date(createdAt);
@@ -135,18 +174,20 @@ const handleSelectAllClick = (event) => {
 };
 
 const handleClick = (event, id) => {
-    const selectedIndex = selected.indexOf(id);
+    const selectedIndex = selectedLeads.indexOf(id);
     let newSelected = [];
+
     if (selectedIndex === -1) {
-        newSelected = newSelected.concat(selected, id);
+        newSelected = newSelected.concat(selectedLeads, id);
     } else if (selectedIndex === 0) {
-        newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-        newSelected = newSelected.concat(selected.slice(0, -1));
+        newSelected = newSelected.concat(selectedLeads.slice(1));
+    } else if (selectedIndex === selectedLeads.length - 1) {
+        newSelected = newSelected.concat(selectedLeads.slice(0, -1));
     } else if (selectedIndex > 0) {
-        newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
+        newSelected = newSelected.concat(selectedLeads.slice(0, selectedIndex), selectedLeads.slice(selectedIndex + 1));
     }
-    setSelected(newSelected);
+
+    setSelectedLeads(newSelected);
 };
 
 const handleChangePage = (event, newPage) => {
@@ -172,7 +213,18 @@ return(
     <>
   <Box sx={{mt:2}}>
                 <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
-
+                {selectedLeads.length > 1 && (
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button
+                            variant="contained"
+                            type="submit"
+                            sx={{ backgroundColor: '#EC6E46 !important' }}
+                            onClick={handleAssignButtonClick}
+                        >
+                            Assign
+                        </Button>
+                    </div>
+                )}
                 <Scrollbar>
                     <TableContainer sx={{ minWidth: 800 }}>
                         <Table>
@@ -187,9 +239,9 @@ return(
                             />
                             <TableBody>
                                 {contactData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo,index) => {
-                                    const { id,heart, name,email,source,createdAt } = custInfo;
+                                    const { id,heart, name,email,source,createdAt ,leadCode} = custInfo;
                                   const SNo=index+1;
-                                    const isItemSelected = selected.indexOf(id) !== -1;
+                                    const isItemSelected = selectedLeads.indexOf(id) !== -1;
 
                                     return (
                                         <TableRow
@@ -219,7 +271,7 @@ return(
                                             </TableCell> */}
                                             <TableCell align="center">
                                                 <Stack direction="row" alignItems="center" spacing={2}>
-                                                <Link to={"/form"} style={{textDecoration:'none'}}>
+                                                <Link to={`/lead/${leadCode}`} style={{ textDecoration: 'none',color:'#000' }} >
                                                     <Typography variant="subtitle2" noWrap>
                                                         {name}
                                                     </Typography>
@@ -247,24 +299,39 @@ return(
                                                     </Typography>
                                                 </Stack>
                                             </TableCell>
-                                            {/* <TableCell align="center">
+                                              {/* <TableCell align="center">
                                             <Stack direction="row" alignItems="center" spacing={2}>
                                                 <Button variant="contained" color="primary" type="submit">
                                                     View
                                                 </Button>
                                                 </Stack>
-                                            </TableCell>
+                                            </TableCell> */}
                                             <TableCell align="center">
                                             <Stack direction="row" alignItems="center" spacing={2}>
                                                 <Dropdown>
                                                     <Dropdown.Toggle as={CustomToggle} />
                                                     <Dropdown.Menu size="sm" title="">
-                                                        <Dropdown.Item><EditIcon />&nbsp;&nbsp;&nbsp;  Edit</Dropdown.Item>
-                                                        <Dropdown.Item><DeleteOutlineIcon />&nbsp;&nbsp;&nbsp;  Delete</Dropdown.Item>
+                                                        <Dropdown.Item onClick={()=>handleRestore(leadCode)}><RefreshIcon />&nbsp;&nbsp;&nbsp;  Restore</Dropdown.Item>
+                                                        <Dropdown.Item onClick={()=>handleDelete(leadCode)}><DeleteOutlineIcon />&nbsp;&nbsp;&nbsp;  Delete</Dropdown.Item>
                                                     </Dropdown.Menu>
                                                 </Dropdown>
                                                 </Stack>
-                                            </TableCell> */}
+                                            </TableCell>
+                                            {selectedLeads.length === 1 && (
+                                                <TableCell align="center">
+                                                    <Stack direction="row" alignItems="center" spacing={2}>
+                                                        <Button
+                                                            variant="contained"
+                                                            type="submit"
+                                                            sx={{ backgroundColor: '#EC6E46 !important' }}
+                                                            onClick={handleAssignButtonClick}
+                                                        >
+                                                            Assign
+                                                        </Button>
+                                                    </Stack>
+                                                </TableCell>
+                                            )}
+                                          
                                         </TableRow>
                                     );
                                 })}
@@ -297,6 +364,38 @@ return(
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
+                  <Dialog
+                    open={showPopup}
+                    onClose={() => setShowPopup(false)}
+                    PaperProps={{
+                        sx: {
+                            width: '400px',
+                            height: '220px',
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)'
+                        }
+                    }}
+                >
+                    <DialogTitle sx={{ textAlign: 'center', fontSize: '20px', fontWeight: 600 }}>Assign Lead to User</DialogTitle>
+                    <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <TextField
+                            label="Enter User Code(s)"
+                            sx={{ width: '300px' }}
+                            value={user}
+                            onChange={(e)=>setUser(e.target.value)}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setShowPopup(false)} sx={{ color: '#EC6E46' }}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleAssignLeads} sx={{ color: '#EC6E46' }}>
+                            Assign
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Box>
     </>
 )

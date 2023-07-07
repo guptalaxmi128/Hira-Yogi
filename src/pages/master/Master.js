@@ -108,7 +108,7 @@ const Master = () => {
                         {...a11yProps(0)}
                     />
                     <Tab
-                        label="Subject"
+                        label="Topic"
                         style={{
                             color: value === 1 ? '#EC6E46' : '#000'
                         }}

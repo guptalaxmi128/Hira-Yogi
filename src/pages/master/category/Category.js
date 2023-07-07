@@ -26,12 +26,17 @@ import {
 } from '@mui/material';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { addCategory } from '../../../actions/master/category';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { addCategory, deleteCategory } from '../../../actions/master/category';
 import Scrollbar from '../../../components/Scrollbar';
 import SearchNotFound from '../../../components/SearchNotFound';
 import { UserListHead, UserListToolbar, UserMoreMenu } from '../../../components/user';
 
-const TABLE_HEAD = [{ id: 'catgory', label: 'Category', alignRight: true }];
+const TABLE_HEAD = [
+    { id: 'sno', label: 'SNo', alignRight: true },
+    { id: 'catgory', label: 'Category', alignRight: true },
+    { id: 'delete', label: <DeleteOutlineIcon />, alignRight: true },
+];
 
 // ----------------------------------------------------------------------
 
@@ -63,8 +68,15 @@ function applySortFilter(array, comparator, query) {
 }
 
 const Category = (props) => {
+    const dispatch=useDispatch();
     const { categories } = props;
-    const [categoriesTable, setCategoriesTable] = useState(categories);
+    console.log(categories)
+    
+    const [categoriesTable, setCategoriesTable] = useState(categories?.data || []);
+
+    const handleDelete=(categoryCode)=>{
+        dispatch(deleteCategory(categoryCode))
+    }
 
     const [page, setPage] = useState(0);
 
@@ -146,14 +158,14 @@ const Category = (props) => {
         console.log(category);
     };
 
-    const dispatch = useDispatch();
+   
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
           const formData = new FormData();
           formData.append('category', category.category);
-          formData.append('categoryimage', image);
+          formData.append('categoryThumbnail', image);
           console.log(formData);
           dispatch(addCategory(formData));
           setCategoriesTable([...categoriesTable, formData]);
@@ -217,8 +229,9 @@ const Category = (props) => {
                                 onSelectAllClick={handleSelectAllClick}
                             />
                             <TableBody>
-                                {categoriesTable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo) => {
-                                    const { id, category, categoryimage } = custInfo;
+                                {categoriesTable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo,index) => {
+                                    const { id, category, categoryCode } = custInfo;
+                                    const SNo = index + 1;
                                     const isItemSelected = selected.indexOf(id) !== -1;
 
                                     return (
@@ -236,8 +249,22 @@ const Category = (props) => {
                                             <TableCell align="center">
                                                 <Stack direction="row" alignItems="center" spacing={2}>
                                                     <Typography variant="subtitle2" noWrap>
+                                                        {SNo}
+                                                    </Typography>
+                                                </Stack>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Stack direction="row" alignItems="center" spacing={2}>
+                                                    <Typography variant="subtitle2" noWrap>
                                                         {category}
                                                     </Typography>
+                                                </Stack>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Stack direction="row" alignItems="center" spacing={2}>
+                                                  
+                                                        <DeleteOutlineIcon onClick={()=>handleDelete(categoryCode)} />
+                                                   
                                                 </Stack>
                                             </TableCell>
                                         </TableRow>

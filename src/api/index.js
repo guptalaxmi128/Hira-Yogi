@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
     baseURL: 'http://localhost:5000/api/admin',
-    // baseURL: 'https://iqra-twfr.onrender.com/api/master'
+    // baseURL: 'https://hira-yogi.onrender.com/api/admin',
 });
 
 api.interceptors.request.use((req) => {
@@ -33,37 +33,68 @@ export const admin = () => api.get(`/information`, {
 
 export const addUser = (userInfo) => api.post(`/registerUser`, userInfo); //working
 export const getUser = () => api.get(`/users`); //working
+export const deleteUser = (userCode) => api.delete(`/deleteUser/${userCode}`); //working
+export const getDeleteUser = () => api.get(`/deletedUsers`);
+export const restoreUser = (userCode) => api.post(`/restoreUser/${userCode}`); 
 
 export const addLead = (leadInfo) => api.post(`/createLead`, leadInfo); //working
-export const getLead = (status) => api.get(`/leadByStatus`,{status :status});
+export const getLead = (status) => api.get(`/leadByStatus`,{status :status}); //working
+export const getLeadByLeadCode = (leadCode) => api.get(`/getLeadByLeadCode/${leadCode}`); //working
+export const updateLead = ( { leadCode,...updatedData }) => api.put(`/updateLeadProfile/${leadCode}`,updatedData); //working
+export const deleteLead = (leadCode) => api.delete(`/deleteLead/${leadCode}`); //working
+export const restoreLead = (leadCode) => api.post(`/restoreLead/${leadCode}`); //working
 
-export const addLeadform = (userInfo) => api.post(`/createLeadFromOutSource`, userInfo); //source is not added
+export const addLeadform = (userInfo) => api.post(`/createLeadFromOutSource`, userInfo); //source is added but some fields is remaining
 
 export const addEmployee = (employeeInfo) => api.post(`/registerEmployee`, employeeInfo); //working
-export const getEmployee = () => api.get(`/allEmployeesInformation`);
+export const getEmployee = () => api.get(`/allEmployeesInformation`); //working
+export const deleteEmployee = (employeesCode) => api.delete(`/deleteEmployees/${employeesCode}`); //working
+export const restoreEmployee = (employeesCode) => api.post(`/restoreEmployee/${employeesCode}`);  
+export const getDeleteEmployee = () => api.get(`/deletedEmployeesInformation`);
 
-export const addCategory = (categoryInfo) => api.post(`/add-categorys`, categoryInfo);
-export const getCategory = () => api.get(`/categorys`);
+export const addAppointmment = (appointmentInfo) => api.post(`/addAppointmentSlote`, appointmentInfo); //working
 
-export const addSubject = (subjectInfo) => api.post(`/add-subjects`, subjectInfo);
-export const getSubject = () => api.get(`/subjects`);
+export const addAssignLead = (assignleadInfo) => api.post(`/assignLeadToUser`, assignleadInfo); //working
 
-export const addMedium = (mediumInfo) => api.post(`/add-mediums`, mediumInfo);
+export const addCategory = (categoryInfo) => api.post(`/addCategory`, categoryInfo);
+export const getCategory = () => api.get(`/categories`);
+export const deleteCategory = (categoryCode) => api.delete(`/deleteCategory/${categoryCode}`);
+
+export const addSubject = (subjectInfo) => api.post(`/addTopic`, subjectInfo); //only name change
+export const getSubject = () => api.get(`/topics`);
+export const deleteSubject= (topicCode) => api.delete(`/deleteTopic/${topicCode}`);
+
+export const addMedium = (mediumInfo) => api.post(`/addMedium`, mediumInfo);
 export const getMedium = () => api.get(`/mediums`);
+export const deleteMedium = (mediumCode) => api.delete(`/deleteMedium/${mediumCode}`);
 
-export const addLevel = (levelInfo) => api.post(`/add-levels`, levelInfo);
+export const addLevel = (levelInfo) => api.post(`/addLevel`, levelInfo);
 export const getLevel = () => api.get(`/levels`);
+export const deleteLevel = (levelCode) => api.delete(`/deleteLevel/${levelCode}`);
 
-export const addLanguage = (languageInfo) => api.post(`/add-languages`, languageInfo);
+export const addLanguage = (languageInfo) => api.post(`/addLanguage`, languageInfo);
 export const getLanguage = () => api.get(`/languages`);
+export const deleteLanguage = (languageCode) => api.delete(`/deleteLanguage/${languageCode}`);
 
-export const addCourse = (courseInfo) => api.post(`/add-addCourses`, courseInfo);
-export const getCourse = () => api.get(`/addCourses`);
+export const addCourse = (courseInfo) => api.post(`/addCourse`, courseInfo); //working
+export const getCourse = () => api.get(`/allCourse`);
 
 export const addLiveclass = (liveclassInfo) => api.post(`/add-liveClasses`, liveclassInfo);
 export const getLiveclass = () => api.get(`/liveClasses`);
 
-export const addUploadcontent = (uploadcontentInfo) => api.post(`/add-contents`, uploadcontentInfo);
+
+export const addUploadcontent = (uploadContent) => { //working
+    const formDataObject = Object.fromEntries(uploadContent);
+    // console.log(formDataObject)
+    const { courseId, ...uploadcontentinfo} = formDataObject;
+    return api.post(`/addCourseContent/${courseId}`, uploadcontentinfo,{
+            headers: {
+              'Content-Type': 'multipart/form-data', 
+            },
+    });
+  };
+
+
 export const getUploadcontent = () => api.get(`/contents`);
 
 export const addImportantIssue = (importantIssueInfo) => api.post(`/add-iICategories`, importantIssueInfo);

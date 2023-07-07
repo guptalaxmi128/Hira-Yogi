@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { TextField } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import background from '../../assets/page-bg.png';
+import logo from "../../assets/logo.png";
 import './LeadForm.css';
 import { addLeadform } from 'actions/leadform/leadform';
 
@@ -22,6 +23,7 @@ const LeadForm = () => {
                 name: name,
                 email:email,
                 phoneNumber:mobileNumber,
+                source:"newlead"
             };
             console.log(user);
             dispatch(addLeadform(user));
@@ -45,15 +47,16 @@ const LeadForm = () => {
                                 <a
                                 //  href="index.html"
                                 >
-                                    <img src="assets/images/logo/logo.svg" alt="" className="mb-10 dark_logo" />
+                                 
                                     <img src="assets/images/logo/logo-white.svg" alt="" className="mb-10 white_logo" />
                                 </a>
                             </div>
                             <div className="text-center 2xl:mb-10 mb-4">
-                                <h4 className="font-medium">Hira Yogi Wellness</h4>
-                                <div className="text-slate-500 dark:text-slate-400 text-base text-center">
+                            <img src={logo} alt="" className="mb-10 dark_logo" height={100} />
+                                <h4 className="font-medium">Welcome Back!</h4>
+                                {/* <div className="text-slate-500 dark:text-slate-400 text-base text-center">
                                     Tell us little more about yourself and your ad spent so we can personalize the follow up
-                                </div>
+                                </div> */}
                             </div>
                             {/* <!-- BEGIN: Login Form --> */}
                             <form className="space-y-4">
@@ -131,7 +134,7 @@ const LeadForm = () => {
                                     {/* </div>
                                 </div> */}
 
-                                <button className="btn btn-dark block w-full text-center" onClick={(e)=>handleSubmit(e)}>Sign in</button>
+                                <button className="btn btn-dark block w-full text-center" onClick={(e)=>handleSubmit(e)}>Submit</button>
                             </form>
                             {/* <!-- END: Login Form --> */}
                         </div>

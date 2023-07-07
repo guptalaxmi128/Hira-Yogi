@@ -20,7 +20,9 @@ import user from './user/user';
 import lead from './lead/lead';
 import leadFrom from './leadform/leadform';
 import employee from './employee/employee';
-  
+import appointment from './appointment/appointment';
+import assignLead from './assignlead/assignlead';
+import leadByLeadCode from './leadbyleadcode/leadbyleadcode';
 
 export const reducers = combineReducers({
     menu,
@@ -40,5 +42,8 @@ export const reducers = combineReducers({
     user,
     lead,
     leadFrom,
-    employee
+    employee,
+    appointment,
+    assignLead,
+    leadByLeadCode
 });

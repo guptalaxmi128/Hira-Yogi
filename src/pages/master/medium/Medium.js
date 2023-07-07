@@ -27,13 +27,17 @@ import {
 
 import { useDispatch, useSelector } from 'react-redux';
 // import { addStatus } from '../../actions/master/status';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import Scrollbar from '../../../components/Scrollbar';
 import SearchNotFound from '../../../components/SearchNotFound';
 import { UserListHead, UserListToolbar, UserMoreMenu } from '../../../components/user';
-import { addMedium } from 'actions/master/medium';
+import { addMedium, deleteMedium } from 'actions/master/medium';
+
 
 const TABLE_HEAD = [
+    { id: 'sno', label: 'SNo', alignRight: true },
     { id: 'catgory', label: 'medium', alignRight: true },
+    { id: 'delete', label: <DeleteOutlineIcon />, alignRight: true },
 ];
 
 // ----------------------------------------------------------------------
@@ -67,7 +71,11 @@ function applySortFilter(array, comparator, query) {
 
 const Medium = (props) => {
     const { mediums } = props;
-    const [mediumsTable, setMediumsTable] = useState(mediums);
+    const [mediumsTable, setMediumsTable] = useState(mediums?.data || []);
+
+    const handleDelete = (mediumCode) =>{
+        dispatch(deleteMedium(mediumCode));
+    }
 
     const [page, setPage] = useState(0);
 
@@ -197,8 +205,9 @@ const Medium = (props) => {
                                 onSelectAllClick={handleSelectAllClick}
                             />
                             <TableBody>
-                                {mediumsTable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo) => {
-                                    const { id, medium } = custInfo;
+                                {mediumsTable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo,index) => {
+                                    const { id, medium,mediumCode } = custInfo;
+                                    const SNo=index+1;
                                     const isItemSelected = selected.indexOf(id) !== -1;
 
                                     return (
@@ -216,8 +225,22 @@ const Medium = (props) => {
                                             <TableCell align="center">
                                                 <Stack direction="row" alignItems="center" spacing={2}>
                                                     <Typography variant="subtitle2" noWrap>
+                                                        {SNo}
+                                                    </Typography>
+                                                </Stack>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Stack direction="row" alignItems="center" spacing={2}>
+                                                    <Typography variant="subtitle2" noWrap>
                                                         {medium}
                                                     </Typography>
+                                                </Stack>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Stack direction="row" alignItems="center" spacing={2} style={{cursor:'pointer'}}>
+                                                    {/* <Typography variant="subtitle2" noWrap> */}
+                                                        <DeleteOutlineIcon onClick={()=>handleDelete(mediumCode)} />
+                                                    {/* </Typography> */}
                                                 </Stack>
                                             </TableCell>
                                         </TableRow>

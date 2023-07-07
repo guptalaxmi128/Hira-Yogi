@@ -2,6 +2,7 @@ import { ADD_UPLOADCONTENT, GET_UPLOADCONTENT } from "constants/actionTypes";
 import * as api from "api/index.js";
 
 export const addUploadContent = (uploadContent) => async (dispatch) => {
+    console.log(uploadContent)
     try {
         const { data } = await api.addUploadcontent(uploadContent);
         dispatch({ type: ADD_UPLOADCONTENT, payload: data });

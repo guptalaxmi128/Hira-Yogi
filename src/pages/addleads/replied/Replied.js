@@ -23,23 +23,27 @@ import {
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import EditIcon from '@mui/icons-material/Edit';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { Link } from 'react-router-dom';
-// import Dropdown from 'react-bootstrap/Dropdown';
-// import "bootstrap/dist/css/bootstrap.min.css";
+import { useDispatch } from 'react-redux';
+import Dropdown from 'react-bootstrap/Dropdown';
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import Scrollbar from '../../../components/Scrollbar';
 import SearchNotFound from '../../../components/SearchNotFound';
 import { UserListHead, UserListToolbar, UserMoreMenu } from '../../../components/user';
+import { addAssignLead } from 'actions/assignlead/assignlead';
+import { deleteLead, restoreLead } from 'actions/leadbyleadcode/leadbyleadcode';
 
-
-const TABLE_HEAD = [{ id: 'sno', label: 'SNo', alignRight: true },
-// { id: 'heart', label: <FavoriteIcon  style={{color:'red'}}/>, alignRight: true },
-{ id: 'name', label: 'Name', alignRight: true },
-{ id:'email',label : 'Email' , alignRight:true},
-{ id: 'source', label: 'Source', alignRight: true },
-{ id: 'date', label: 'Date', alignRight: true },
-// { id: '3dots', label: <MoreVertIcon />, alignRight: true },
+const TABLE_HEAD = [
+    { id: 'sno', label: 'SNo', alignRight: true },
+    // { id: 'heart', label: <FavoriteIcon  style={{color:'red'}}/>, alignRight: true },
+    { id: 'name', label: 'Name', alignRight: true },
+    { id: 'email', label: 'Email', alignRight: true },
+    { id: 'source', label: 'Source', alignRight: true },
+    { id: 'date', label: 'Date', alignRight: true },
+    { id: '3dots', label: <MoreVertIcon />, alignRight: true },
 ];
 
 // ----------------------------------------------------------------------
@@ -83,96 +87,155 @@ function applySortFilter(array, comparator, query) {
         return filter(array, (_user) => _user.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
     }
     return stabilizedThis.map((el) => el[0]);
-
 }
 
-
 const Replied = (props) => {
-    const {lead} =props;
+    const dispatch = useDispatch();
+    const { lead } = props;
     const [listTable, setListTable] = useState(lead?.data);
     const repliedData = listTable.filter((item) => item.status === 'replied');
+    const [selectedLeads, setSelectedLeads] = useState([]);
+    const [showPopup, setShowPopup] = useState(false);
+    const [user, setUser] = useState(''); //for one users
+
+    const leadCodes = repliedData.map((item) => item.leadCode);
+
+
+    const handleRestore= (leadCode)=>{
+        dispatch(restoreLead(leadCode));
+    }
+    const handleDelete = (leadCode) => {
+        dispatch(deleteLead(leadCode));
+      };
+
+    const handleAssignButtonClick = () => {
+        setShowPopup(true);
+    };
+
+    const handleAssignLeads = () => {
+        try {
+            const assignlead = {
+                leadProfileCode: leadCodes,
+                //  userCode:assignedUsers
+                userInformationCode: user
+            };
+            console.log(assignlead);
+            dispatch(addAssignLead(assignlead));
+        } catch (error) {
+            console.log(error);
+        }
+        setUser('');
+        // setAssignedUsers([]);
+        setShowPopup(false);
+    };
 
     function formatDate(createdAt) {
         const date = new Date(createdAt);
         const day = date.getDate();
         const month = date.getMonth() + 1; // Months are zero-based
         const year = date.getFullYear();
-      
+
         // Pad single digits with leading zero
         const formattedDay = day < 10 ? `0${day}` : day;
         const formattedMonth = month < 10 ? `0${month}` : month;
-      
+
         return `${formattedDay}/${formattedMonth}/${year}`;
-      }
-
-
-
-const [page, setPage] = useState(0);
-
-const [order, setOrder] = useState('asc');
-
-const [selected, setSelected] = useState([]);
-
-const [orderBy, setOrderBy] = useState('name');
-
-const [filterName, setFilterName] = useState('');
-
-const [rowsPerPage, setRowsPerPage] = useState(5);
-
-const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-};
-
-const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-        const newSelecteds = repliedData.map((n) => n.id);
-        setSelected(newSelecteds);
-        return;
     }
-    setSelected([]);
-};
 
-const handleClick = (event, id) => {
-    const selectedIndex = selected.indexOf(id);
-    let newSelected = [];
-    if (selectedIndex === -1) {
-        newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-        newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-        newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-        newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
-    }
-    setSelected(newSelected);
-};
+    const [page, setPage] = useState(0);
 
-const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-};
+    const [order, setOrder] = useState('asc');
 
-const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-};
+    const [selected, setSelected] = useState([]);
 
-const handleFilterByName = (event) => {
-    setFilterName(event.target.value);
-};
+    const [orderBy, setOrderBy] = useState('name');
 
-const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - articlesTable.length) : 0;
+    const [filterName, setFilterName] = useState('');
 
-const filteredUsers = applySortFilter(repliedData, getComparator(order, orderBy), filterName);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
 
-const isUserNotFound = filteredUsers.length === 0;
+    const handleRequestSort = (event, property) => {
+        const isAsc = orderBy === property && order === 'asc';
+        setOrder(isAsc ? 'desc' : 'asc');
+        setOrderBy(property);
+    };
 
-return(
-    <>
-  <Box sx={{mt:2}}>
+    const handleSelectAllClick = (event) => {
+        if (event.target.checked) {
+            const newSelecteds = repliedData.map((n) => n.id);
+            setSelected(newSelecteds);
+            return;
+        }
+        setSelected([]);
+    };
+
+    // const handleClick = (event, id) => {
+    //     const selectedIndex = selected.indexOf(id);
+    //     let newSelected = [];
+    //     if (selectedIndex === -1) {
+    //         newSelected = newSelected.concat(selected, id);
+    //     } else if (selectedIndex === 0) {
+    //         newSelected = newSelected.concat(selected.slice(1));
+    //     } else if (selectedIndex === selected.length - 1) {
+    //         newSelected = newSelected.concat(selected.slice(0, -1));
+    //     } else if (selectedIndex > 0) {
+    //         newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
+    //     }
+    //     setSelected(newSelected);
+    // };
+
+    const handleClick = (event, id) => {
+        const selectedIndex = selectedLeads.indexOf(id);
+        let newSelected = [];
+
+        if (selectedIndex === -1) {
+            newSelected = newSelected.concat(selectedLeads, id);
+        } else if (selectedIndex === 0) {
+            newSelected = newSelected.concat(selectedLeads.slice(1));
+        } else if (selectedIndex === selectedLeads.length - 1) {
+            newSelected = newSelected.concat(selectedLeads.slice(0, -1));
+        } else if (selectedIndex > 0) {
+            newSelected = newSelected.concat(selectedLeads.slice(0, selectedIndex), selectedLeads.slice(selectedIndex + 1));
+        }
+
+        setSelectedLeads(newSelected);
+    };
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+    const handleFilterByName = (event) => {
+        setFilterName(event.target.value);
+    };
+
+    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - articlesTable.length) : 0;
+
+    const filteredUsers = applySortFilter(repliedData, getComparator(order, orderBy), filterName);
+
+    const isUserNotFound = filteredUsers.length === 0;
+
+    return (
+        <>
+            <Box sx={{ mt: 2 }}>
                 <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
-
+                {selectedLeads.length > 1 && (
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button
+                            variant="contained"
+                            type="submit"
+                            sx={{ backgroundColor: '#EC6E46 !important' }}
+                            onClick={handleAssignButtonClick}
+                        >
+                            Assign
+                        </Button>
+                    </div>
+                )}
                 <Scrollbar>
                     <TableContainer sx={{ minWidth: 800 }}>
                         <Table>
@@ -186,11 +249,11 @@ return(
                                 onSelectAllClick={handleSelectAllClick}
                             />
                             <TableBody>
-                                {repliedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo,index) => {
-                                    const { id,heart, name,email,source,createdAt } = custInfo;
-                                    const SNo=index+1;
-                                 
-                                    const isItemSelected = selected.indexOf(id) !== -1;
+                                {repliedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo, index) => {
+                                    const { id, heart, name, email, source, createdAt,leadCode } = custInfo;
+                                    const SNo = index + 1;
+
+                                    const isItemSelected = selectedLeads.indexOf(id) !== -1;
 
                                     return (
                                         <TableRow
@@ -220,10 +283,10 @@ return(
                                             </TableCell> */}
                                             <TableCell align="center">
                                                 <Stack direction="row" alignItems="center" spacing={2}>
-                                                <Link to={"/form"} style={{textDecoration:'none'}}>
-                                                    <Typography variant="subtitle2" noWrap>
-                                                        {name}
-                                                    </Typography>
+                                                <Link to={`/lead/${leadCode}`} style={{ textDecoration: 'none',color:'#000' }} >
+                                                        <Typography variant="subtitle2" noWrap>
+                                                            {name}
+                                                        </Typography>
                                                     </Link>
                                                 </Stack>
                                             </TableCell>
@@ -248,24 +311,39 @@ return(
                                                     </Typography>
                                                 </Stack>
                                             </TableCell>
+                                            <TableCell align="center">
+                                            <Stack direction="row" alignItems="center" spacing={2}>
+                                                <Dropdown>
+                                                    <Dropdown.Toggle as={CustomToggle} />
+                                                    <Dropdown.Menu size="sm" title="">
+                                                        <Dropdown.Item onClick={()=>handleRestore(leadCode)}><RefreshIcon />&nbsp;&nbsp;&nbsp;  Restore</Dropdown.Item>
+                                                        <Dropdown.Item onClick={()=>handleDelete(leadCode)}><DeleteOutlineIcon />&nbsp;&nbsp;&nbsp;  Delete</Dropdown.Item>
+                                                    </Dropdown.Menu>
+                                                </Dropdown>
+                                                </Stack>
+                                            </TableCell>
+                                            {selectedLeads.length === 1 && (
+                                                <TableCell align="center">
+                                                    <Stack direction="row" alignItems="center" spacing={2}>
+                                                        <Button
+                                                            variant="contained"
+                                                            type="submit"
+                                                            sx={{ backgroundColor: '#EC6E46 !important' }}
+                                                            onClick={handleAssignButtonClick}
+                                                        >
+                                                            Assign
+                                                        </Button>
+                                                    </Stack>
+                                                </TableCell>
+                                            )}
                                             {/* <TableCell align="center">
                                             <Stack direction="row" alignItems="center" spacing={2}>
                                                 <Button variant="contained" color="primary" type="submit">
                                                     View
                                                 </Button>
                                                 </Stack>
-                                            </TableCell>
-                                            <TableCell align="center">
-                                            <Stack direction="row" alignItems="center" spacing={2}>
-                                                <Dropdown>
-                                                    <Dropdown.Toggle as={CustomToggle} />
-                                                    <Dropdown.Menu size="sm" title="">
-                                                        <Dropdown.Item><EditIcon />&nbsp;&nbsp;&nbsp;  Edit</Dropdown.Item>
-                                                        <Dropdown.Item><DeleteOutlineIcon />&nbsp;&nbsp;&nbsp;  Delete</Dropdown.Item>
-                                                    </Dropdown.Menu>
-                                                </Dropdown>
-                                                </Stack>
                                             </TableCell> */}
+                                          
                                         </TableRow>
                                     );
                                 })}
@@ -292,19 +370,47 @@ return(
                 <TablePagination
                     rowsPerPageOptions={[5, 10, 25]}
                     component="div"
-                    count={listTable.length}
+                    count={repliedData.length}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
+                <Dialog
+                    open={showPopup}
+                    onClose={() => setShowPopup(false)}
+                    PaperProps={{
+                        sx: {
+                            width: '400px',
+                            height: '220px',
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)'
+                        }
+                    }}
+                >
+                    <DialogTitle sx={{ textAlign: 'center', fontSize: '20px', fontWeight: 600 }}>Assign Lead to User</DialogTitle>
+                    <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <TextField
+                            label="Enter User Code(s)"
+                            sx={{ width: '300px' }}
+                            value={user}
+                            onChange={(e) => setUser(e.target.value)}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setShowPopup(false)} sx={{ color: '#EC6E46' }}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleAssignLeads} sx={{ color: '#EC6E46' }}>
+                            Assign
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Box>
-    </>
-)
-   
-   
-  
-        
+        </>
+    );
 };
 
 export default Replied;

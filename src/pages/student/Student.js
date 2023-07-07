@@ -7,6 +7,7 @@ import NewStudent from './newstudent/NewStudent';
 import Course from "./course/Course";
 
 import { useSelector } from 'react-redux';
+import User from './user/User';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -72,7 +73,7 @@ const Student = () => {
                     aria-label="scrollable auto tabs example"
                     sx={{
                         '& .MuiTabs-indicator': {
-                            bgcolor: value === 0 ? '#EC6E46' : value === 1 ? '#EC6E46' : value === 2 ? '#EC6E46' : '#000'
+                            bgcolor: value === 0 ? '#EC6E46' : value === 1 ? '#EC6E46' : value === 2 ? '#EC6E46' : value === 3 ?'#EC6E46' : '#000'
                         }
                     }}
                 >
@@ -97,6 +98,13 @@ const Student = () => {
                         }}
                         {...a11yProps(2)}
                     />
+                       <Tab
+                        label="User"
+                        style={{
+                            color: value === 3 ? '#EC6E46' : '#000'
+                        }}
+                        {...a11yProps(3)}
+                    />
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
@@ -111,6 +119,9 @@ const Student = () => {
             </TabPanel>
             <TabPanel value={value} index={2}>
                 <Course />
+            </TabPanel>
+            <TabPanel value={value} index={3}>
+                <User />
             </TabPanel>
         </Box>
     );

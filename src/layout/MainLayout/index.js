@@ -24,9 +24,10 @@ import { getLanguages } from 'actions/master/language';
 import { getCourses } from 'actions/course/course';
 import { getImportantIssues } from 'actions/master/importantIssues';
 import { getWeeklyNews } from 'actions/master/weeklyNew';
-import {getUser} from "actions/user/user";
+import {getUser,getDeleteUser} from "actions/user/user";
 import { getLead } from 'actions/lead/lead';
-import { getEmployee } from 'actions/employee/employee';
+import {  getEmployee,getDeleteEmployee } from 'actions/employee/employee';
+
 
 // ==============================|| MAIN LAYOUT ||============================== //
 
@@ -47,6 +48,9 @@ const MainLayout = () => {
             await dispatch(getUser());
             await dispatch(getLead());
             await dispatch(getEmployee());
+            await dispatch(getDeleteEmployee());
+            await dispatch(getDeleteUser());
+          
         };
         getReduxData();
     }, [dispatch]);

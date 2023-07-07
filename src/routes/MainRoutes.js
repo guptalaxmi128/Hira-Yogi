@@ -22,11 +22,12 @@ const AddLeads=Loadable(lazy(()=>import('pages/addleads/AddLeads')));
 const Student=Loadable(lazy(()=>import('pages/student/Student')));
 const Form=Loadable(lazy(()=>import('pages/addleads/form/Form')));
 const Employee=Loadable(lazy(()=>import('pages/empolyee/Employee')));
-const UserDetail=Loadable(lazy(()=>import('pages/business/userdetail/UserDetail')))
-const LeadForm=Loadable(lazy(()=>import('pages/leadform/LeadForm')))
+const UserDetail=Loadable(lazy(()=>import('pages/business/userdetail/UserDetail')));
+const UpdateLead=Loadable(lazy(()=>import('pages/addleads/updateLead/UpdateLead')));
+const Appointment=Loadable(lazy(()=>import('pages/appointment/Appointment')));
 // ==============================|| MAIN ROUTING ||============================== //
-
 const MainRoutes = {
+    
     path: '/',
     element: <MainLayout />,
     children: [
@@ -75,10 +76,16 @@ const MainRoutes = {
             element: <UserDetail />
         },
         {
-            path: 'lead-form',
-            element: <LeadForm />
+              path: `lead/:LEAD1000`,
+            element: <UpdateLead />
+        },
+        {
+            path: 'appointment',
+            element: <Appointment />
         }
     ]
 };
+
+
 
 export default MainRoutes;

@@ -6,6 +6,7 @@ import { useTheme } from '@mui/material/styles';
 import { useSelector } from 'react-redux';
 import NewEmployee from './newemployee/NewEmployee';
 import List from './list/List';
+import RestoreEmployee from './restoreemployee/RestoreEmployee';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -36,7 +37,9 @@ function a11yProps(index) {
 
 const Employee = () => {
     const employee=useSelector((state)=>state.employee.employee || []);
+    const deletedEmployee=useSelector((state)=>state.employee.deletedEmployee || []);
     // console.log(employee)
+    // console.log(deletedEmployee)
     const [value, setValue] = useState(0);
 
     const handleChange = (event, newValue) => {
@@ -71,12 +74,12 @@ const Employee = () => {
                     aria-label="scrollable auto tabs example"
                     sx={{
                         '& .MuiTabs-indicator': {
-                            bgcolor: value === 0 ? '#EC6E46' : value === 1 ? '#EC6E46'  : '#000'
+                            bgcolor: value === 0 ? '#EC6E46' : value === 1 ? '#EC6E46'  : value === 2 ? '#EC6E46'  : '#000'
                         }
                     }}
                 >
                     <Tab
-                        label="Add New User"
+                        label="Add New Employee"
                         style={{
                             color: value === 0 ? '#EC6E46' : '#000'
                         }}
@@ -89,6 +92,13 @@ const Employee = () => {
                         }}
                         {...a11yProps(1)}
                     />
+                       <Tab
+                        label="Restore Employee"
+                        style={{
+                            color: value === 2 ? '#EC6E46' : '#000'
+                        }}
+                        {...a11yProps(1)}
+                    />
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
@@ -96,6 +106,9 @@ const Employee = () => {
             </TabPanel>
             <TabPanel value={value} index={1}>
               <List employee={employee} />
+            </TabPanel>
+            <TabPanel value={value} index={2}>
+              <RestoreEmployee deletedEmployee={deletedEmployee} />
             </TabPanel>
         </Box>
     );

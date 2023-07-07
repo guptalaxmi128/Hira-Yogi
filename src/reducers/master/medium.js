@@ -18,6 +18,17 @@ const mediumReducer = (state = initialState, action) => {
                 ...state,
                 mediums: [...state.mediums, action.payload],
             };
+            case actionTypes.DELETE_MEDIUM:
+                const updatedMedium = [];
+                for (let i = 0; i < state.mediums.length; i++) {
+                  if (state.mediums[i].code !== action.payload) {
+                    updatedMedium.push(state.mediums[i]);
+                  }
+                }
+                return {
+                  ...state,
+                  mediums: updatedMedium,
+                };
         default:
             return state;
     }

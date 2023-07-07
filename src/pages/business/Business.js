@@ -5,6 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import { useSelector} from 'react-redux';
 import AddNew from './AddNew';
 import List from './list/List';
+import RestoreUser from './restoreUser/RestoreUser';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -35,7 +36,8 @@ function a11yProps(index) {
 
 const Business = () => {
     const user = useSelector((state) => state.user.user || []);
-    // console.log(user)
+    const deletedUser=useSelector((state)=>state.user.deletedUser || []);
+    console.log(deletedUser)
   
 
     const [value, setValue] = useState(0);
@@ -72,7 +74,7 @@ const Business = () => {
                     aria-label="scrollable auto tabs example"
                     sx={{
                         '& .MuiTabs-indicator': {
-                            bgcolor: value === 0 ? '#EC6E46' : value === 1 ? '#EC6E46' : '#000'
+                            bgcolor: value === 0 ? '#EC6E46' : value === 1 ? '#EC6E46' : value === 2 ? '#EC6E46': '#000'
                         }
                     }}
                 >
@@ -90,13 +92,25 @@ const Business = () => {
                         }}
                         {...a11yProps(1)}
                     />
+                     <Tab
+                        label="Restore User"
+                        style={{
+                            color: value === 2 ? '#EC6E46' : '#000'
+                        }}
+                        {...a11yProps(1)}
+                    />
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
-                <AddNew />
+                <AddNew 
+                //  user ={user}
+                  />
             </TabPanel>
             <TabPanel value={value} index={1}>
                 <List user ={user} />
+            </TabPanel>
+            <TabPanel value={value} index={2}>
+               <RestoreUser deletedUser={deletedUser} />
             </TabPanel>
         </Box>
     );

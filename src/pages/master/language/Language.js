@@ -27,13 +27,16 @@ import {
 
 import { useDispatch, useSelector } from 'react-redux';
 // import { addStatus } from '../../actions/master/status';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import Scrollbar from '../../../components/Scrollbar';
 import SearchNotFound from '../../../components/SearchNotFound';
 import { UserListHead, UserListToolbar, UserMoreMenu } from '../../../components/user';
-import { addLanguage } from 'actions/master/language';
+import { addLanguage, deleteLanguage } from 'actions/master/language';
 
 const TABLE_HEAD = [
+    { id: 'sno', label: 'SNo', alignRight: true },
     { id: 'language', label: 'Language', alignRight: true },
+    { id: 'delete', label: <DeleteOutlineIcon />, alignRight: true },
 ];
 
 // ----------------------------------------------------------------------
@@ -67,7 +70,12 @@ function applySortFilter(array, comparator, query) {
 
 const Language = (props) => {
     const { languages } = props;
-    const [languagesTable, setLanguagesTable] = useState(languages);
+    const [languagesTable, setLanguagesTable] = useState(languages?.data || []);
+
+
+    const handleDelete = (languageCode) =>{
+        dispatch(deleteLanguage(languageCode));
+    }
 
     const [page, setPage] = useState(0);
 
@@ -197,8 +205,9 @@ const Language = (props) => {
                                 onSelectAllClick={handleSelectAllClick}
                             />
                             <TableBody>
-                                {languagesTable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo) => {
-                                    const { id, language } = custInfo;
+                                {languagesTable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo,index) => {
+                                    const { id, language,languageCode } = custInfo;
+                                    const SNo =index+1;
                                     const isItemSelected = selected.indexOf(id) !== -1;
 
                                     return (
@@ -216,8 +225,22 @@ const Language = (props) => {
                                             <TableCell align="center">
                                                 <Stack direction="row" alignItems="center" spacing={2}>
                                                     <Typography variant="subtitle2" noWrap>
+                                                        {SNo}
+                                                    </Typography>
+                                                </Stack>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Stack direction="row" alignItems="center" spacing={2}>
+                                                    <Typography variant="subtitle2" noWrap>
                                                         {language}
                                                     </Typography>
+                                                </Stack>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Stack direction="row" alignItems="center" spacing={2} style={{cursor:'pointer'}}>
+                                                    {/* <Typography variant="subtitle2" noWrap> */}
+                                                        <DeleteOutlineIcon onClick={()=>handleDelete(languageCode)} />
+                                                    {/* </Typography> */}
                                                 </Stack>
                                             </TableCell>
                                         </TableRow>

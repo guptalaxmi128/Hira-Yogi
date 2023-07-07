@@ -1,4 +1,4 @@
-import { ADD_SUBJECT, GET_SUBJECT } from "constants/actionTypes";
+import { ADD_SUBJECT, DELETE_SUBJECT, GET_SUBJECT } from "constants/actionTypes";
 import * as api from "api/index.js";
 
 export const getSubjects = () => async (dispatch) => {
@@ -18,3 +18,12 @@ export const addSubject = (subject) => async (dispatch) => {
         console.log(error.message);
     }
 }
+
+export const deleteSubject = (topicCode) => async (dispatch) => {
+    try {
+      await api.deleteSubject(topicCode);
+      dispatch({ type: DELETE_SUBJECT, payload: topicCode });
+    } catch (error) {
+      console.log(error);
+    }
+  };

@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import AddCourse from './NewCourse/AddCourse';
 import LiveClasses from './LiveClasses/AddLiveClasses';
 import UploadContent from './UploadContent/AddUploadContent';
+import Courses from './courses/Courses';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -35,12 +36,13 @@ function a11yProps(index) {
 }
 
 const Course = () => {
-    const categories = useSelector((state) => state.category.categories);
-    const subjects = useSelector((state) => state.subject.subjects);
-    const mediums = useSelector((state) => state.medium.mediums);
-    const levels = useSelector((state) => state.level.levels);
-    const languages = useSelector((state) => state.language.languages);
     const courses = useSelector((state) => state.course.courses);
+    const languages= useSelector((state) => state.language.languages);
+    const levels= useSelector((state) => state.level.levels);
+    const categories= useSelector((state) => state.category.categories);
+    const subjects= useSelector((state) => state.subject.subjects);
+    console.log(languages)
+
     // console.log(courses);
     // const courses = [
     //     {
@@ -108,18 +110,28 @@ const Course = () => {
                         style={{
                             color: value === 1 ? '#EC6E46' : '#000'
                         }}
+                        {...a11yProps(1)}
+                    />
+                      <Tab
+                        label="Courses"
+                        style={{
+                            color: value === 2 ? '#EC6E46' : '#000'
+                        }}
                         {...a11yProps(2)}
                     />
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
-                <AddCourse categories={categories} levels={levels} languages={languages} subjects={subjects} />
+                <AddCourse languages={languages} levels={levels} categories={categories} subjects={subjects} />
             </TabPanel>
             {/* <TabPanel value={value} index={1}>
                 <LiveClasses courses={courses} />
             </TabPanel> */}
             <TabPanel value={value} index={1}>
-                <UploadContent courses={courses} subjects={subjects} />
+                <UploadContent  courses={courses}  />
+            </TabPanel>
+            <TabPanel value={value} index={2}>
+                <Courses courses={courses}  />
             </TabPanel>
         </Box>
     );

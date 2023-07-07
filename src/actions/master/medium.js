@@ -1,4 +1,4 @@
-import { ADD_MEDIUM, GET_MEDIUM } from "constants/actionTypes";
+import { ADD_MEDIUM, DELETE_MEDIUM, GET_MEDIUM } from "constants/actionTypes";
 import * as api from "api/index.js";
 
 export const getMediums = () => async (dispatch) => {
@@ -19,3 +19,11 @@ export const addMedium = (medium) => async (dispatch) => {
     }
 }
 
+export const deleteMedium = (mediumCode) => async (dispatch) => {
+    try {
+      await api.deleteMedium(mediumCode);
+      dispatch({ type: DELETE_MEDIUM, payload: mediumCode });
+    } catch (error) {
+      console.log(error);
+    }
+  };

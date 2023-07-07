@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef,useEffect } from 'react';
 import React from 'react';
 // material-ui
 import {
@@ -188,9 +188,14 @@ const Tags = ({ data, handleDelete }) => {
 };
 
 const AddCourse = (props) => {
-    const { categories, levels, languages } = props;
+    const {languages,levels ,categories,subjects} =props;
+    console.log(languages)
 
-    const subjectArray = useSelector((state) => state.subject.subjects);
+
+    // const categories = ['Category 1', 'Category 2', 'Category 3', 'Category 4'];
+    // const levels = ['Beginner', 'Intermediate', 'Advanced'];
+
+
 
     const ITEM_HEIGHT = 48;
     const ITEM_PADDING_TOP = 8;
@@ -203,30 +208,21 @@ const AddCourse = (props) => {
         }
     };
 
-    const [course, setCourse] = useState({
-        category: '',
-        courseName: '',
-        price: '',
-        heading: '',
-        description: '',
-        lesson: '',
-        level: '',
-        duration: '',
-        language: '',
-        subjects: ''
-    });
+    const [category, setCategory] = useState('');
+    const [coursePrice, setCoursePrice] = useState('');
+    const [description, setDescription] = useState('');
+    const [heading, setHeading] = useState('');
+    const [level, setLevel] = useState('');
+    const [language, setLanguage] = useState('');
+    const [subject, setSubject] = useState('');
+    const [courseName, setCourseName] = useState('');
+    const [duration, setDuration] = useState('');
+    const [lesson, setLesson] = useState('');
 
     const [image, setImage] = useState();
 
-    const handleChange = (event) => {
-        setCourse({ ...course, [event.target.name]: event.target.value });
-    };
-
-    const [subjects, setSubjects] = useState([]);
-    const tagRef = useRef();
-
     const handleCategoryChange = (event) => {
-        setCourse({ ...course, category: event.target.value });
+        setCategory(event.target.value);
     };
 
     const handleImageFile = (event) => {
@@ -234,19 +230,15 @@ const AddCourse = (props) => {
     };
 
     const handleLevelChange = (event) => {
-        setCourse({ ...course, level: event.target.value });
+        setLevel(event.target.value);
     };
 
     const handleLanguageChange = (event) => {
-        setCourse({ ...course, language: event.target.value });
+        setLanguage(event.target.value);
     };
 
     const handleSubjectsChange = (event) => {
-        const {
-            target: { value }
-        } = event;
-        setSubjects(typeof value === 'string' ? value.split(',') : value);
-        console.log(subjects);
+        setSubject(event.target.value);
     };
 
     const dispatch = useDispatch();
@@ -254,32 +246,31 @@ const AddCourse = (props) => {
     const handleSubmit = () => {
         try {
             const formData = new FormData();
-            formData.append('category', course.category);
-            formData.append('courseName', course.courseName);
-            formData.append('price', course.price);
-            formData.append('heading', course.heading);
-            formData.append('description', course.description);
-            formData.append('lesson', course.lesson);
-            formData.append('level', course.level);
-            formData.append('duration', course.duration);
-            formData.append('language', course.language);
-            formData.append('subjects', subjects);
-            formData.append('image', image);
+            formData.append('category', category);
+            formData.append('courseName', courseName);
+            formData.append('coursePrice', coursePrice);
+            formData.append('heading', heading);
+            formData.append('description', description);
+            formData.append('lesson', lesson);
+            formData.append('level', level);
+            formData.append('duration', duration);
+            formData.append('language', language);
+            formData.append('subjects', subject);
+            formData.append('courseImage', image);
             console.log(formData);
             dispatch(addCourse(formData));
-            setCourse({
-                category: '',
-                courseName: '',
-                price: '',
-                heading: '',
-                description: '',
-                lesson: '',
-                level: '',
-                duration: '',
-                language: '',
-                subjects: ''
-            });
+            setCategory('');
+            setCourseName('');
+            setCoursePrice('');
+            setHeading('');
+            setDescription('');
+            setDuration('');
+            setLanguage('');
+            setLevel('');
+            setLesson('');
+            setSubject('');
             setImage();
+            alert('courses added successfully!');
         } catch (error) {
             console.log(error);
         }
@@ -295,11 +286,11 @@ const AddCourse = (props) => {
                     <Select
                         labelId="demo-simple-select-label"
                         id="demo-simple-select"
-                        value={course.category}
+                        value={category}
                         label="Topic"
                         onChange={handleCategoryChange}
                     >
-                        {categories.map((category) => (
+                        {categories && categories.data && categories?.data.map((category) => (
                             <MenuItem value={category.category}>{category.category}</MenuItem>
                         ))}
                     </Select>
@@ -311,8 +302,8 @@ const AddCourse = (props) => {
                     sx={{ ml: { sm: 1 }, mt: { xs: 2, sm: 0 } }}
                     type="text"
                     name="courseName"
-                    value={course.courseName}
-                    onChange={handleChange}
+                    value={courseName}
+                    onChange={(e) => setCourseName(e.target.value)}
                 />
             </Box>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, mt: 2, mb: 2 }}>
@@ -323,8 +314,8 @@ const AddCourse = (props) => {
                     sx={{ mr: { sm: 1 } }}
                     type="number"
                     name="price"
-                    value={course.price}
-                    onChange={handleChange}
+                    value={coursePrice}
+                    onChange={(e) => setCoursePrice(e.target.value)}
                 />
                 <Box sx={{ width: '100%', ml: { xs: 0, sm: 1 }, mt: { xs: 2, sm: 0 } }}>
                     <Button
@@ -348,8 +339,8 @@ const AddCourse = (props) => {
                     sx={{ mr: { xs: 0, sm: 1 } }}
                     type="text"
                     name="heading"
-                    value={course.heading}
-                    onChange={handleChange}
+                    value={heading}
+                    onChange={(e) => setHeading(e.target.value)}
                 />
                 <Box sx={{ width: '100%', ml: { xs: 0, sm: 1 } }} />
             </Box>
@@ -361,8 +352,8 @@ const AddCourse = (props) => {
                     sx={{ mr: { sm: 1 } }}
                     type="text"
                     name="description"
-                    value={course.description}
-                    onChange={handleChange}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                 />
                 <TextField
                     label="Lesson"
@@ -371,8 +362,8 @@ const AddCourse = (props) => {
                     sx={{ ml: { xs: 0, sm: 1 }, mt: { xs: 2, sm: 0 } }}
                     type="text"
                     name="lesson"
-                    value={course.lesson}
-                    onChange={handleChange}
+                    value={lesson}
+                    onChange={(e) => setLesson(e.target.value)}
                 />
             </Box>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, mt: 2, mb: 2 }}>
@@ -381,11 +372,11 @@ const AddCourse = (props) => {
                     <Select
                         labelId="demo-simple-select-label"
                         id="demo-simple-select"
-                        value={course.level}
+                        value={level}
                         label="Topic"
                         onChange={handleLevelChange}
                     >
-                        {levels.map((level) => (
+                        {levels && levels.data && levels?.data.map((level) => (
                             <MenuItem value={level.level}>{level.level}</MenuItem>
                         ))}
                     </Select>
@@ -397,8 +388,8 @@ const AddCourse = (props) => {
                     sx={{ ml: { sm: 1 }, mt: { xs: 2, sm: 0 } }}
                     type="text"
                     name="duration"
-                    value={course.duration}
-                    onChange={handleChange}
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
                 />
             </Box>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, mt: 2, mb: 2 }}>
@@ -407,11 +398,11 @@ const AddCourse = (props) => {
                     <Select
                         labelId="demo-simple-select-label"
                         id="demo-simple-select"
-                        value={course.language}
+                        value={language}
                         label="Language"
                         onChange={handleLanguageChange}
                     >
-                        {languages.map((language) => (
+                        {languages && languages.data && languages?.data.map((language) => (
                             <MenuItem value={language.language}>{language.language}</MenuItem>
                         ))}
                     </Select>
@@ -426,28 +417,22 @@ const AddCourse = (props) => {
                         }
                     }}
                 >
-                    <InputLabel id="demo-multiple-checkbox-label">Subjects</InputLabel>
+                    <InputLabel id="demo-simple-select-label">Topics</InputLabel>
                     <Select
-                        labelId="demo-multiple-checkbox-label"
-                        id="demo-multiple-checkbox"
-                        multiple
-                        value={subjects}
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        value={subject}
+                        label="Topics"
                         onChange={handleSubjectsChange}
-                        input={<OutlinedInput label="Tags" />}
-                        renderValue={(selected) => selected.join(', ')}
-                        MenuProps={MenuProps}
                     >
-                        {subjectArray.map((subject) => (
-                            <MenuItem key={subject.id} value={subject.subject}>
-                                <Checkbox checked={subjects.indexOf(subject.subject) > -1} />
-                                <ListItemText primary={subject.subject} />
-                            </MenuItem>
+                        {subjects && subjects.data && subjects?.data.map((topic) => (
+                            <MenuItem value={topic.topic}>{topic.topic}</MenuItem>
                         ))}
                     </Select>
                 </FormControl>
             </Box>
             <Box>
-                <Button variant="contained" sx={{background:'#EC6E46'}} type="submit" onClick={() => handleSubmit()}>
+                <Button variant="contained" sx={{ background: '#EC6E46' }} type="submit" onClick={() => handleSubmit()}>
                     Submit
                 </Button>
             </Box>

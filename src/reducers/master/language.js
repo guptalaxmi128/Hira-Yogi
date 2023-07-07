@@ -18,6 +18,17 @@ export default function languageReducer(state = initialState, action) {
                 ...state,
                 languages: [...state.languages, action.payload],
             };
+            case actionTypes.DELETE_LANGUAGE:
+                const updatedLanguage = [];
+                for (let i = 0; i < state.languages.length; i++) {
+                  if (state.languages[i].code !== action.payload) {
+                    updatedLanguage.push(state.languages[i]);
+                  }
+                }
+                return {
+                  ...state,
+                  languages: updatedLanguage,
+                };
         default:
             return state;
     }

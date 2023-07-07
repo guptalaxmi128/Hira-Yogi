@@ -1,4 +1,4 @@
-import { ADD_LEVEL, GET_LEVEL } from "constants/actionTypes";
+import { ADD_LEVEL, DELETE_LEVEL, GET_LEVEL } from "constants/actionTypes";
 import * as api from "api/index.js";
 
 export const getLevels = () => async (dispatch) => {
@@ -19,3 +19,11 @@ export const addLevel = (level) => async (dispatch) => {
     }
 }
 
+export const deleteLevel = (levelCode) => async (dispatch) => {
+    try {
+      await api.deleteLevel(levelCode);
+      dispatch({ type: DELETE_LEVEL, payload: levelCode });
+    } catch (error) {
+      console.log(error);
+    }
+  };

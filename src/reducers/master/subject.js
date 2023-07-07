@@ -18,6 +18,17 @@ const subjectReducer = (state = initialState, action) => {
                 ...state,
                 subjects: [...state.subjects, action.payload],
             };
+            case actionTypes.DELETE_SUBJECT:
+                const updatedSubject = [];
+                for (let i = 0; i < state.subjects.length; i++) {
+                  if (state.subjects[i].code !== action.payload) {
+                    updatedSubject.push(state.subjects[i]);
+                  }
+                }
+                return {
+                  ...state,
+                  subjects: updatedSubject,
+                };
         default:
             return state;
     }

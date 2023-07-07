@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import React from 'react';
 // material-ui
 import {
@@ -188,15 +188,26 @@ const Tags = ({ data, handleDelete }) => {
 };
 
 const UploadContent = (props) => {
-    const { courses, subjects } = props;
+    const { courses } = props;
+    const [courseId, setCourseId] = useState('');
+
+    useEffect(() => {
+        if (props.courses && props.courses.data) {
+            const newCourseId = props.courses.data.map((item) => item.id).join(', ');
+            setCourseId(newCourseId);
+        } else {
+            console.error('Courses data is undefined or missing.');
+        }
+    }, [props.courses]);
+    const subjects = ['Mathematics', 'Science', 'History', 'English', 'Geography', 'Art', 'Music'];
 
     const videoTypes = [
         {
-            videoType: 'Youtube',
+            videoType: 'Youtube'
         },
         {
-            videoType: 'Vimeo',
-        },
+            videoType: 'Vimeo'
+        }
     ];
 
     const ITEM_HEIGHT = 48;
@@ -216,10 +227,31 @@ const UploadContent = (props) => {
         videoTitle: '',
         videoType: '',
         videoLink: '',
-        notes: '',
+        notes: ''
     });
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const displayValue = selectedFiles.length === 1 ? selectedFiles[0].name : `${selectedFiles.length} files`;
 
-    const [pdf, setPDF] = useState();
+    const handleFileChange = (event) => {
+        const files = event.target.files;
+        if (files.length < 1) {
+            alert('Please select at least 1 file.');
+            return;
+        }
+
+        if (files.length > 10) {
+            alert('Please select a maximum of 10 files.');
+            return;
+        }
+        const fileList = [];
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            fileList.push(file);
+        }
+        console.log(fileList);
+        setSelectedFiles(fileList);
+    };
 
     const handleChange = (event) => {
         setUploadContent({ ...uploadContent, [event.target.name]: event.target.value });
@@ -235,16 +267,11 @@ const UploadContent = (props) => {
         setUploadContent({ ...uploadContent, subject: event.target.value });
     };
 
-
-    const handlePDFFile = (event) => {
-        setPDF(event.target.files[0]);
-    };
-
     const handlevideoTypeChange = (event) => {
         setUploadContent({ ...uploadContent, videoType: event.target.value });
     };
 
-    console.log(pdf);
+    console.log(selectedFiles);
     const dispatch = useDispatch();
 
     const handleSubmit = () => {
@@ -256,7 +283,11 @@ const UploadContent = (props) => {
             formData.append('videoTitle', uploadContent.videoTitle);
             formData.append('videoType', uploadContent.videoType);
             formData.append('videoLink', uploadContent.videoLink);
-            formData.append('notes', pdf);
+            selectedFiles.forEach((file) => {
+                console.log(file);
+                formData.append('contentNotes', file);
+            });
+            formData.append('courseId', courseId);
             dispatch(addUploadContent(formData));
             setUploadContent({
                 course: '',
@@ -264,9 +295,9 @@ const UploadContent = (props) => {
                 videoTitle: '',
                 videoType: '',
                 videoLink: '',
-                notes: '',
+                notes: ''
             });
-            setPDF();
+            setSelectedFiles();
         } catch (error) {
             console.log(error);
         }
@@ -284,12 +315,16 @@ const UploadContent = (props) => {
                         label="Course"
                         onChange={handleCourseChange}
                     >
-                        {courses.map((course) => (
-                            <MenuItem value={course.courseName}>{course.courseName}</MenuItem>
-                        ))}
+                        {courses && courses.data
+                            ? courses.data.map((course) => (
+                                  <MenuItem key={course.courseName} value={course.courseName}>
+                                      {course.courseName}
+                                  </MenuItem>
+                              ))
+                            : null}
                     </Select>
                 </FormControl>
-                <FormControl fullWidth sx={{ ml: { sm: 1 }, mt: {xs: 2, sm:0} }}>
+                <FormControl fullWidth sx={{ ml: { sm: 1 }, mt: { xs: 2, sm: 0 } }}>
                     <InputLabel id="demo-simple-select-label">Subject</InputLabel>
                     <Select
                         labelId="demo-simple-select-label"
@@ -299,7 +334,7 @@ const UploadContent = (props) => {
                         onChange={handleSubjectsChange}
                     >
                         {subjects.map((subject) => (
-                            <MenuItem value={subject.subject}>{subject.subject}</MenuItem>
+                            <MenuItem value={subject}>{subject}</MenuItem>
                         ))}
                     </Select>
                 </FormControl>
@@ -315,7 +350,7 @@ const UploadContent = (props) => {
                     value={uploadContent.videoTitle}
                     onChange={handleChange}
                 />
-                <FormControl fullWidth sx={{ ml: { sm: 1 }, mt:{xs:2, sm:0} }}>
+                <FormControl fullWidth sx={{ ml: { sm: 1 }, mt: { xs: 2, sm: 0 } }}>
                     <InputLabel id="demo-simple-select-label">Video Type</InputLabel>
                     <Select
                         labelId="demo-simple-select-label"
@@ -342,21 +377,14 @@ const UploadContent = (props) => {
                     onChange={handleChange}
                 />
                 <Box sx={{ width: '100%', ml: { xs: 0, sm: 1 }, mt: { xs: 2, sm: 0 } }}>
-                    <Button
-                        variant="outlined"
-                        fullWidth
-                        component="label"
-                        style={{ height: '37px' }}
-                        value={pdf}
-                        onChange={(e) => handlePDFFile(e)}
-                    >
-                        Upload Notes
-                        <input hidden type="file" />
+                    <Button variant="outlined" fullWidth component="label" style={{ height: '37px' }}>
+                        {selectedFiles.length === 0 ? 'Upload Notes' : displayValue}
+                        <input type="file" accept=".pdf" multiple onChange={handleFileChange} min="1" max="10" hidden />
                     </Button>
                 </Box>
             </Box>
             <Box>
-                <Button variant="contained" sx={{background:'#EC6E46'}} type="submit" onClick={() => handleSubmit()}>
+                <Button variant="contained" sx={{ background: '#EC6E46 !important' }} type="submit" onClick={() => handleSubmit()}>
                     Submit
                 </Button>
             </Box>

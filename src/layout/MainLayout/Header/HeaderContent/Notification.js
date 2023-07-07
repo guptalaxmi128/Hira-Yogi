@@ -281,7 +281,7 @@ const Notification = () => {
                 sx={{
                     width: '100%',
                     maxWidth: '200px',
-                    backgroundColor:'#EC6E46',
+                    backgroundColor:'#EC6E46 !important',
                     color:'#fff'
                 }}
                 onClick={() => {

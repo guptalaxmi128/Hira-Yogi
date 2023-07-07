@@ -23,22 +23,23 @@ import {
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import EditIcon from '@mui/icons-material/Edit';
-// import Dropdown from 'react-bootstrap/Dropdown';
-// import "bootstrap/dist/css/bootstrap.min.css";
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { useDispatch } from 'react-redux';
+import Dropdown from 'react-bootstrap/Dropdown';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { Link } from 'react-router-dom';
 import Scrollbar from '../../../components/Scrollbar';
 import SearchNotFound from '../../../components/SearchNotFound';
 import { UserListHead, UserListToolbar, UserMoreMenu } from '../../../components/user';
-// import * as api from 'api';
+import { deleteUser } from 'actions/user/user';
 
 const TABLE_HEAD = [
     { id: 'sno', label: 'SNo', alignRight: true },
     { id: 'name', label: 'Name', alignRight: true },
     { id: 'email', label: 'Email', alignRight: true },
     { id: 'phoneNumber', label: 'Mobile Number', alignRight: true },
-    { id: 'userCode', label: 'Employee Code', alignRight: true }
-    // { id: '3dots', label: <MoreVertIcon />, alignRight: true },
+    { id: 'userCode', label: 'Employee Code', alignRight: true },
+    { id: '3dots', label: <MoreVertIcon />, alignRight: true }
 ];
 
 // ----------------------------------------------------------------------
@@ -79,16 +80,20 @@ function applySortFilter(array, comparator, query) {
         return a[1] - b[1];
     });
     if (query) {
-        return filter(array, (_user) => _user.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
+        return stabilizedThis.filter((_user) => _user[0].name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
     }
     return stabilizedThis.map((el) => el[0]);
 }
 
 const List = (props) => {
+    const dispatch = useDispatch();
     const { user } = props;
     // console.log(user.data);
+    const handleDelete = (userCode) => {
+        dispatch(deleteUser(userCode));
+    };
 
-    const [listTable, setListTable] = useState(user.data);
+    const [listTable, setListTable] = useState(user?.data || []);
 
     const [page, setPage] = useState(0);
 
@@ -145,7 +150,7 @@ const List = (props) => {
         setFilterName(event.target.value);
     };
 
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - articlesTable.length) : 0;
+    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - listTable.length) : 0;
 
     const filteredUsers = applySortFilter(listTable, getComparator(order, orderBy), filterName);
 
@@ -169,9 +174,9 @@ const List = (props) => {
                                 onSelectAllClick={handleSelectAllClick}
                             />
                             <TableBody>
-                                {listTable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo,index) => {
+                                {listTable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo, index) => {
                                     const { id, name, email, userCode, phoneNumber } = custInfo;
-                                    const SNo =index+1;
+                                    const SNo = index + 1;
                                     const isItemSelected = selected.indexOf(id) !== -1;
 
                                     return (
@@ -195,10 +200,10 @@ const List = (props) => {
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Stack direction="row" alignItems="center" spacing={2}>
-                                                <Link to={"/user-detail"} style={{textDecoration:'none',color:'#000'}}>
-                                                    <Typography variant="subtitle2" noWrap>
-                                                        {name}
-                                                    </Typography>
+                                                    <Link to={'/user-detail'} style={{ textDecoration: 'none', color: '#000' }}>
+                                                        <Typography variant="subtitle2" noWrap>
+                                                            {name}
+                                                        </Typography>
                                                     </Link>
                                                 </Stack>
                                             </TableCell>
@@ -229,18 +234,21 @@ const List = (props) => {
                                                     View
                                                 </Button>
                                                 </Stack>
-                                            </TableCell>
-                                            <TableCell align="center">
-                                            <Stack direction="row" alignItems="center" spacing={2}>
-                                                <Dropdown>
-                                                    <Dropdown.Toggle as={CustomToggle} />
-                                                    <Dropdown.Menu size="sm" title="">
-                                                        <Dropdown.Item><EditIcon />&nbsp;&nbsp;&nbsp;  Edit</Dropdown.Item>
-                                                        <Dropdown.Item><DeleteOutlineIcon />&nbsp;&nbsp;&nbsp;  Delete</Dropdown.Item>
-                                                    </Dropdown.Menu>
-                                                </Dropdown>
-                                                </Stack>
                                             </TableCell> */}
+                                            <TableCell align="center">
+                                                <Stack direction="row" alignItems="center" spacing={2}>
+                                                    <Dropdown>
+                                                        <Dropdown.Toggle as={CustomToggle} />
+                                                        <Dropdown.Menu size="sm" title="">
+                                                            {/* <Dropdown.Item><RefreshIcon />&nbsp;&nbsp;&nbsp;  Restore</Dropdown.Item> */}
+                                                            <Dropdown.Item onClick={() => handleDelete(userCode)}>
+                                                                <DeleteOutlineIcon />
+                                                                &nbsp;&nbsp;&nbsp; Delete
+                                                            </Dropdown.Item>
+                                                        </Dropdown.Menu>
+                                                    </Dropdown>
+                                                </Stack>
+                                            </TableCell>
                                         </TableRow>
                                     );
                                 })}

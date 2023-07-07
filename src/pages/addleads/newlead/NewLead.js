@@ -19,27 +19,32 @@ import {
     Select,
     MenuItem,
     InputLabel,
-    FormControl
+    FormControl,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { useDispatch } from 'react-redux';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import EditIcon from '@mui/icons-material/Edit';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { Link } from 'react-router-dom';
-// import Dropdown from 'react-bootstrap/Dropdown';
-// import "bootstrap/dist/css/bootstrap.min.css";
+import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import Dropdown from 'react-bootstrap/Dropdown';
+import "bootstrap/dist/css/bootstrap.min.css";
 import Scrollbar from '../../../components/Scrollbar';
 import SearchNotFound from '../../../components/SearchNotFound';
 import { UserListHead, UserListToolbar, UserMoreMenu } from '../../../components/user';
+import { addAssignLead } from 'actions/assignlead/assignlead';
+import { deleteLead, restoreLead } from 'actions/leadbyleadcode/leadbyleadcode';
 
 
-const TABLE_HEAD = [{ id: 'sno', label: 'SNo', alignRight: true },
-{ id: 'heart', label: <FavoriteIcon  style={{color:'red'}}/>, alignRight: true },
-{ id: 'name', label: 'Name', alignRight: true },
-{ id:'email',label : 'Email' , alignRight:true},
-{ id: 'source', label: 'Source', alignRight: true },
-{ id: 'date', label: 'Date', alignRight: true },
-// { id: '3dots', label: <MoreVertIcon />, alignRight: true },
+const TABLE_HEAD = [
+    { id: 'sno', label: 'SNo', alignRight: true },
+    // { id: 'heart', label: <FavoriteIcon  style={{color:'red'}}/>, alignRight: true },
+    { id: 'name', label: 'Name', alignRight: true },
+    { id: 'email', label: 'Email', alignRight: true },
+    { id: 'source', label: 'Source', alignRight: true },
+    { id: 'date', label: 'Date', alignRight: true },
+    { id: '3dots', label: <MoreVertIcon />, alignRight: true },
 ];
 
 // ----------------------------------------------------------------------
@@ -83,89 +88,214 @@ function applySortFilter(array, comparator, query) {
         return filter(array, (_user) => _user.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
     }
     return stabilizedThis.map((el) => el[0]);
-
 }
+
+// function getComparator(order, orderBy) {
+//     return order === 'desc' ? (a, b) => descendingComparator(a, b, orderBy) : (a, b) => -descendingComparator(a, b, orderBy);
+//   }
+  
+//   function applySortFilter(array, comparator, query) {
+//     const stabilizedThis = array.map((el, index) => [el, index]);
+//     stabilizedThis.sort((a, b) => {
+//       const order = comparator(a[0], b[0]);
+//       if (order !== 0) return order;
+//       return a[1] - b[1];
+//     });
+//     if (query) {
+//       return stabilizedThis
+//         .filter((_user) => _user[0].name.toLowerCase().indexOf(query.toLowerCase()) !== -1)
+//         .map((el) => el[0]);
+//     }
+//     return stabilizedThis.map((el) => el[0]);
+//   }
+  
 
 
 const NewLead = (props) => {
-    // const { articles} =props;
-    const [listTable, setListTable] = useState([{
-        id:1,
-        heart:<FavoriteIcon style={{color:'red'}} />,
-        name:'laxmi',
-        email:'guptalaxmi@gmail.com',
-       source:'abc',
-       date:'05/06/23'
-    }]);
-//  console.log('articlestable',articlesTable)
+    const dispatch = useDispatch();
+    const { lead } = props;
+    const [listTable, setListTable] = useState(lead?.data);
+    const [selectedLeads, setSelectedLeads] = useState([]);
+    const [showPopup, setShowPopup] = useState(false);
+    // const [assignedUsers, setAssignedUsers] = useState([]); //for multiple users
+    const [user, setUser] = useState(''); //for one users
 
-const [page, setPage] = useState(0);
+    const leadCodes = listTable.map((item) => item.leadCode);
 
-const [order, setOrder] = useState('asc');
+    // console.log(listTable);
+    // console.log(leadCodes);
 
-const [selected, setSelected] = useState([]);
+    const handleDelete = (leadCode) => {
+        dispatch(deleteLead(leadCode));
+      };
 
-const [orderBy, setOrderBy] = useState('name');
+      const handleRestore =(leadCode)=>{
+        dispatch(restoreLead(leadCode));
+      }
 
-const [filterName, setFilterName] = useState('');
+    const handleAssignButtonClick = () => {
+        setShowPopup(true);
+    };
+    
 
-const [rowsPerPage, setRowsPerPage] = useState(5);
+    const handleAssignButton = () => {
+        handleAssignButtonClick();
+      
+        // Wait for a short delay before executing the rest of the logic
+        setTimeout(() => {
+          try {
+            const assignlead = {
+              leadProfileCode: leadCodes,
+              userInformationCode: user
+            };
+            console.log(assignlead);
+            dispatch(addAssignLead(assignlead));
+          } catch (error) {
+            console.log(error);
+          }
+      
+          setUser('');
+          setShowPopup(false);
+        }, 50000);
+      };
+      
 
-const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-};
+ 
+      
+      const handleAssignLeads = () => {
+        try {
+          // Filter the selected leads from the listTable
+          const selectedLeadsData = listTable.filter((custInfo) => selectedLeads.includes(custInfo.id));
+      
+          // Create an array of leadProfileCode values
+          const leadProfileCodes = selectedLeadsData.map((selectedLead) => selectedLead.leadCode);
+      
+          // Assign the same userInformationCode to all leadProfileCode values
+          const assignLead = {
+            leadProfileCode: leadProfileCodes,
+            userInformationCode: user
+          };
+      
+          console.log('Assigning leads:', assignLead);
+          dispatch(addAssignLead(assignLead));
+        } catch (error) {
+          console.log(error);
+        }
+      
+        setUser('');
+        setShowPopup(false);
+      };
+      
+      
 
-const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-        const newSelecteds = listTable.map((n) => n.id);
-        setSelected(newSelecteds);
-        return;
+    function formatDate(createdAt) {
+        const date = new Date(createdAt);
+        const day = date.getDate();
+        const month = date.getMonth() + 1; // Months are zero-based
+        const year = date.getFullYear();
+
+        // Pad single digits with leading zero
+        const formattedDay = day < 10 ? `0${day}` : day;
+        const formattedMonth = month < 10 ? `0${month}` : month;
+
+        return `${formattedDay}/${formattedMonth}/${year}`;
     }
-    setSelected([]);
-};
+    const [page, setPage] = useState(0);
 
-const handleClick = (event, id) => {
-    const selectedIndex = selected.indexOf(id);
-    let newSelected = [];
-    if (selectedIndex === -1) {
-        newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-        newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-        newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-        newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
-    }
-    setSelected(newSelected);
-};
+    const [order, setOrder] = useState('asc');
 
-const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-};
+    const [selected, setSelected] = useState([]);
 
-const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-};
+    const [orderBy, setOrderBy] = useState('name');
 
-const handleFilterByName = (event) => {
-    setFilterName(event.target.value);
-};
+    const [filterName, setFilterName] = useState('');
 
-const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - articlesTable.length) : 0;
+    const [rowsPerPage, setRowsPerPage] = useState(5);
 
-const filteredUsers = applySortFilter(listTable, getComparator(order, orderBy), filterName);
+    const handleRequestSort = (event, property) => {
+        const isAsc = orderBy === property && order === 'asc';
+        setOrder(isAsc ? 'desc' : 'asc');
+        setOrderBy(property);
+    };
 
-const isUserNotFound = filteredUsers.length === 0;
+    const handleSelectAllClick = (event) => {
+        if (event.target.checked) {
+            const newSelecteds = listTable.map((n) => n.id);
+            setSelected(newSelecteds);
+            return;
+        }
+        setSelected([]);
+    };
 
-return(
-    <>
-  <Box sx={{mt:2}}>
-                <UserListToolbar numSelected={selected.length} filterName={filterName} onFilterName={handleFilterByName} />
+    // const handleClick = (event, id) => {
+    //     const selectedIndex = selected.indexOf(id);
+    //     let newSelected = [];
+    //     if (selectedIndex === -1) {
+    //         newSelected = newSelected.concat(selected, id);
+    //     } else if (selectedIndex === 0) {
+    //         newSelected = newSelected.concat(selected.slice(1));
+    //     } else if (selectedIndex === selected.length - 1) {
+    //         newSelected = newSelected.concat(selected.slice(0, -1));
+    //     } else if (selectedIndex > 0) {
+    //         newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
+    //     }
+    //     setSelected(newSelected);
+    // };
 
+    const handleClick = (event, id) => {
+        const selectedIndex = selectedLeads.indexOf(id);
+        let newSelected = [];
+
+        if (selectedIndex === -1) {
+            newSelected = newSelected.concat(selectedLeads, id);
+        } else if (selectedIndex === 0) {
+            newSelected = newSelected.concat(selectedLeads.slice(1));
+        } else if (selectedIndex === selectedLeads.length - 1) {
+            newSelected = newSelected.concat(selectedLeads.slice(0, -1));
+        } else if (selectedIndex > 0) {
+            newSelected = newSelected.concat(selectedLeads.slice(0, selectedIndex), selectedLeads.slice(selectedIndex + 1));
+        }
+
+        setSelectedLeads(newSelected);
+    };
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+    const handleFilterByName = (event) => {
+        setFilterName(event.target.value);
+    };
+
+    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - listTable.length) : 0;
+
+    const filteredUsers = applySortFilter(listTable, getComparator(order, orderBy), filterName);
+
+    const isUserNotFound = filteredUsers.length === 0;
+
+    return (
+        <>
+            <Box sx={{ mt: 2 }}>
+                <UserListToolbar numSelected={selectedLeads.length} filterName={filterName} onFilterName={handleFilterByName} />
+                {selectedLeads.length > 1 && (
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button
+                            variant="contained"
+                            type="submit"
+                            sx={{ backgroundColor: '#EC6E46 !important' }}
+                            onClick={handleAssignButton}
+                        >
+                            Assign
+                        </Button>
+                    </div>
+                )}
                 <Scrollbar>
+             
                     <TableContainer sx={{ minWidth: 800 }}>
                         <Table>
                             <UserListHead
@@ -173,15 +303,18 @@ return(
                                 orderBy={orderBy}
                                 headLabel={TABLE_HEAD}
                                 rowCount={listTable.length}
-                                numSelected={selected.length}
+                                numSelected={selectedLeads.length}
                                 onRequestSort={handleRequestSort}
                                 onSelectAllClick={handleSelectAllClick}
                             />
                             <TableBody>
-                                {listTable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo) => {
-                                    const { id,heart, name,email,source,date } = custInfo;
-                                    {/* console.log("allarticles",custInfo) */}
-                                    const isItemSelected = selected.indexOf(id) !== -1;
+                                {listTable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((custInfo, index) => {
+                                    const { id, name, email, source, createdAt, leadCode } = custInfo;
+                                    const SNo = index + 1;
+                                    {
+                                        /* const isItemSelected = selected.indexOf(id) !== -1; */
+                                    }
+                                    const isItemSelected = selectedLeads.indexOf(id) !== -1;
 
                                     return (
                                         <TableRow
@@ -198,23 +331,23 @@ return(
                                             <TableCell align="center">
                                                 <Stack direction="row" alignItems="center" spacing={2}>
                                                     <Typography variant="subtitle2" noWrap>
-                                                        {id}
+                                                        {SNo}
                                                     </Typography>
                                                 </Stack>
                                             </TableCell>
-                                            <TableCell align="center">
+                                            {/* <TableCell align="center">
                                                 <Stack direction="row" alignItems="center" spacing={2}>
                                                     <Typography variant="subtitle2" noWrap>
                                                         {heart}
                                                     </Typography>
                                                 </Stack>
-                                            </TableCell>
+                                            </TableCell> */}
                                             <TableCell align="center">
                                                 <Stack direction="row" alignItems="center" spacing={2}>
-                                                <Link to={"/form"} style={{textDecoration:'none'}}>
-                                                    <Typography variant="subtitle2" noWrap>
-                                                        {name}
-                                                    </Typography>
+                                                    <Link to={`/lead/${leadCode}`} style={{ textDecoration: 'none',color:'#000' }} >
+                                                        <Typography variant="subtitle2" noWrap>
+                                                            {name}
+                                                        </Typography>
                                                     </Link>
                                                 </Stack>
                                             </TableCell>
@@ -235,28 +368,43 @@ return(
                                             <TableCell align="center">
                                                 <Stack direction="row" alignItems="center" spacing={2}>
                                                     <Typography variant="subtitle2" noWrap>
-                                                        {date}
+                                                        {formatDate(createdAt)}
                                                     </Typography>
                                                 </Stack>
                                             </TableCell>
-                                            {/* <TableCell align="center">
+                                               {/* <TableCell align="center">
                                             <Stack direction="row" alignItems="center" spacing={2}>
                                                 <Button variant="contained" color="primary" type="submit">
                                                     View
                                                 </Button>
                                                 </Stack>
-                                            </TableCell>
+                                            </TableCell> */}
                                             <TableCell align="center">
                                             <Stack direction="row" alignItems="center" spacing={2}>
                                                 <Dropdown>
                                                     <Dropdown.Toggle as={CustomToggle} />
                                                     <Dropdown.Menu size="sm" title="">
-                                                        <Dropdown.Item><EditIcon />&nbsp;&nbsp;&nbsp;  Edit</Dropdown.Item>
-                                                        <Dropdown.Item><DeleteOutlineIcon />&nbsp;&nbsp;&nbsp;  Delete</Dropdown.Item>
+                                                        <Dropdown.Item onClick={()=>handleRestore(leadCode)}><RefreshIcon  />&nbsp;&nbsp;&nbsp;  Restore</Dropdown.Item>
+                                                        <Dropdown.Item onClick={()=>handleDelete(leadCode)}><DeleteOutlineIcon />&nbsp;&nbsp;&nbsp;  Delete</Dropdown.Item>
                                                     </Dropdown.Menu>
                                                 </Dropdown>
                                                 </Stack>
-                                            </TableCell> */}
+                                            </TableCell>
+                                            {selectedLeads.length === 1 && (
+                                                <TableCell align="center">
+                                                    <Stack direction="row" alignItems="center" spacing={2}>
+                                                        <Button
+                                                            variant="contained"
+                                                            type="submit"
+                                                            sx={{ backgroundColor: '#EC6E46 !important' }}
+                                                            onClick={handleAssignButtonClick}
+                                                        >
+                                                            Assign
+                                                        </Button>
+                                                    </Stack>
+                                                </TableCell>
+                                            )}
+                                         
                                         </TableRow>
                                     );
                                 })}
@@ -289,13 +437,57 @@ return(
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
+                <Dialog
+                    open={showPopup}
+                    onClose={() => setShowPopup(false)}
+                    PaperProps={{
+                        sx: {
+                            width: '400px',
+                            height: '220px',
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)'
+                        }
+                    }}
+                >
+                    <DialogTitle sx={{ textAlign: 'center', fontSize: '20px', fontWeight: 600 }}>Assign Lead to User</DialogTitle>
+                    <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <TextField
+                            label="Enter User Code(s)"
+                            sx={{ width: '300px' }}
+                            // value={assignedUsers}
+                            // onChange={(event) => setAssignedUsers(event.target.value)}
+                            value={user}
+                            onChange={(e)=>setUser(e.target.value)}
+                        />
+                        {/* <Autocomplete
+                            options={userOptions}
+                            getOptionLabel={(option) => option}
+                            renderInput={(params) => <TextField {...params} label="Enter User Code(s)" sx={{ width: '300px' }} />}
+                            value={user}
+                            onChange={(event, newValue) => {
+                                if (newValue !== null) {
+                                    setUser(newValue);
+                                } else {
+                                    setUser(''); // Set to initial value instead of an empty string
+                                }
+                            }}
+                            freeSolo
+                        /> */}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setShowPopup(false)} sx={{ color: '#EC6E46' }}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleAssignLeads} sx={{ color: '#EC6E46' }}>
+                            Assign
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Box>
-    </>
-)
-   
-   
-  
-        
+        </>
+    );
 };
 
 export default NewLead;
